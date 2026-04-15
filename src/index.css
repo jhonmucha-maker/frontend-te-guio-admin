@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== CSS Variables for Theme ===== */
+:root {
+  /* Neutral scale (light) */
+  --neutral-50: 250 250 250;
+  --neutral-100: 245 245 245;
+  --neutral-200: 238 238 238;
+  --neutral-300: 224 224 224;
+  --neutral-400: 189 189 189;
+  --neutral-500: 158 158 158;
+  --neutral-600: 117 117 117;
+  --neutral-700: 97 97 97;
+  --neutral-800: 66 66 66;
+  --neutral-900: 33 33 33;
+
+  /* Gray scale (light - Tailwind defaults) */
+  --gray-50: 249 250 251;
+  --gray-100: 243 244 246;
+  --gray-200: 229 231 235;
+  --gray-300: 209 213 219;
+  --gray-400: 156 163 175;
+  --gray-500: 107 114 128;
+  --gray-600: 75 85 99;
+  --gray-700: 55 65 81;
+  --gray-800: 31 41 55;
+  --gray-900: 17 24 39;
+
+  /* Surface */
+  --surface: 255 255 255;
+  --surface-alt: 250 250 250;
+}
+
+.dark {
+  --neutral-50: 32 34 40;
+  --neutral-100: 40 42 50;
+  --neutral-200: 52 55 65;
+  --neutral-300: 68 71 82;
+  --neutral-400: 115 118 130;
+  --neutral-500: 148 151 162;
+  --neutral-600: 180 183 194;
+  --neutral-700: 205 208 216;
+  --neutral-800: 225 227 233;
+  --neutral-900: 240 241 245;
+
+  --gray-50: 32 34 40;
+  --gray-100: 40 42 50;
+  --gray-200: 52 55 65;
+  --gray-300: 68 71 82;
+  --gray-400: 115 118 130;
+  --gray-500: 148 151 162;
+  --gray-600: 180 183 194;
+  --gray-700: 205 208 216;
+  --gray-800: 225 227 233;
+  --gray-900: 240 241 245;
+
+  --surface: 42 44 54;
+  --surface-alt: 32 34 40;
+}
+
+/* ===== Base styles ===== */
+@layer base {
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans antialiased bg-neutral-100 text-neutral-900;
+  }
+
+  #root {
+    @apply min-h-screen flex flex-col;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-primary outline-offset-2;
+  }
+
+  /* Checkbox & radio: color consistente en todos los dispositivos */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: #312c85;
+    color-scheme: light;
+  }
+  .dark input[type="checkbox"],
+  .dark input[type="radio"] {
+    accent-color: #9990ED;
+    color-scheme: dark;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  img {
+    @apply max-w-full h-auto;
+  }
+}
+
+/* ===== Scrollbar ===== */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-neutral-100 rounded;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded hover:bg-neutral-400;
+  }
+}
+
+/* ===== Components ===== */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-button font-semibold text-sm transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-dark shadow-sm hover:shadow-md active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:bg-secondary-light;
+  }
+
+  .btn-outline {
+    @apply btn border-2 border-neutral-300 text-neutral-700 hover:border-primary hover:text-primary bg-transparent;
+  }
+
+  .btn-ghost {
+    @apply btn text-neutral-600 hover:bg-neutral-100;
+  }
+
+  .btn-danger {
+    @apply btn bg-error text-white hover:bg-error-dark;
+  }
+
+  .btn-success {
+    @apply btn bg-success text-white hover:bg-success-dark;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .card {
+    @apply bg-surface rounded-card shadow-card border border-neutral-300 transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card-hover;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 rounded-input border border-neutral-300 text-neutral-900 bg-surface placeholder-neutral-400 transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:bg-neutral-100 disabled:cursor-not-allowed;
+  }
+
+  .input-error {
+    @apply border-error focus:border-error focus:ring-error/20;
+  }
+
+  .select {
+    @apply input appearance-none bg-surface pr-10 cursor-pointer;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary/10 text-primary;
+  }
+
+  .badge-success {
+    @apply badge bg-success-50 text-success-600;
+  }
+
+  .badge-error {
+    @apply badge bg-error-50 text-error-600;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning-50 text-warning-600;
+  }
+
+  .badge-info {
+    @apply badge bg-info-50 text-info-600;
+  }
+
+  .badge-neutral {
+    @apply badge bg-neutral-100 text-neutral-600;
+  }
+
+  .badge-accent {
+    @apply badge bg-accent/10 text-accent-dark;
+  }
+
+  .table {
+    @apply w-full text-sm text-left;
+  }
+
+  .table th {
+    @apply px-4 py-3 font-semibold text-neutral-700 bg-neutral-50 border-b border-neutral-200;
+  }
+
+  .table td {
+    @apply px-4 py-3 border-b border-neutral-100;
+  }
+
+  .table tbody tr {
+    @apply hover:bg-neutral-50 transition-colors;
+  }
+
+  .alert {
+    @apply p-4 rounded-lg flex items-start gap-3 text-sm;
+  }
+
+  .alert-success {
+    @apply alert bg-success-50 text-success-600;
+  }
+
+  .alert-error {
+    @apply alert bg-error-50 text-error-600;
+  }
+
+  .alert-warning {
+    @apply alert bg-warning-50 text-warning-600;
+  }
+
+  .alert-info {
+    @apply alert bg-info-50 text-info-600;
+  }
+
+  .avatar {
+    @apply inline-flex items-center justify-center rounded-full bg-primary text-white font-semibold;
+  }
+
+  .avatar-sm {
+    @apply w-8 h-8 text-xs;
+  }
+
+  .avatar-md {
+    @apply w-10 h-10 text-sm;
+  }
+
+  .avatar-lg {
+    @apply w-12 h-12 text-base;
+  }
+
+  .skeleton {
+    @apply bg-neutral-200 animate-pulse rounded;
+  }
+
+  .spinner {
+    @apply animate-spin rounded-full border-2 border-neutral-300 border-t-primary;
+  }
+
+  .dialog-overlay {
+    @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4;
+  }
+
+  .dialog-content {
+    @apply bg-surface rounded-card shadow-modal max-h-[90vh] overflow-auto w-full;
+  }
+
+  .tooltip {
+    @apply absolute z-50 px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-md shadow-lg whitespace-nowrap;
+  }
+
+  .gradient-header {
+    background: linear-gradient(135deg, #312c85 0%, #4a44a8 50%, rgba(74, 68, 168, 0.8) 100%);
+  }
+
+  .btn-accent {
+    @apply btn bg-accent text-white hover:bg-accent-dark;
+  }
+}
+
+/* ===== Dark mode overrides for semantic colors ===== */
+.dark .badge-success { background-color: rgba(76, 175, 80, 0.15); color: #81C784; }
+.dark .badge-error { background-color: rgba(244, 67, 54, 0.15); color: #E57373; }
+.dark .badge-warning { background-color: rgba(255, 152, 0, 0.15); color: #FFB74D; }
+.dark .badge-info { background-color: rgba(33, 150, 243, 0.15); color: #64B5F6; }
+
+.dark .alert-success { background-color: rgba(76, 175, 80, 0.12); color: #81C784; }
+.dark .alert-error { background-color: rgba(244, 67, 54, 0.12); color: #E57373; }
+.dark .alert-warning { background-color: rgba(255, 152, 0, 0.12); color: #FFB74D; }
+.dark .alert-info { background-color: rgba(33, 150, 243, 0.12); color: #64B5F6; }
+
+/* Leaflet fix */
+.leaflet-container {
+  z-index: 1;
+}
+
+/* Badge pulse animation */
+@keyframes badge-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.pulse-animation {
+  animation: badge-pulse 2s infinite;
+}
