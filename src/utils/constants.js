@@ -114,8 +114,14 @@ export const BREAKPOINTS = {
   xl: 1536,
 };
 
+// Codigos de error de autenticacion (deben coincidir con backend/config/constants.js AUTH_ERROR_CODES)
+export const AUTH_ERROR_CODES = {
+  ACCOUNT_DISABLED: 'ACCOUNT_DISABLED',
+};
+
 // Eventos SSE (deben coincidir EXACTO con backend/config/eventNames.js)
 export const SSE_EVENTS = {
+  ACCOUNT_DISABLED: 'account.disabled',
   ADMIN_PENDING_SELLER: 'admin.pending.seller',
   ADMIN_PENDING_STORE: 'admin.pending.store',
   ADMIN_PENDING_PRODUCT: 'admin.pending.product',

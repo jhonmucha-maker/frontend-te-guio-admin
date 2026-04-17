@@ -16,6 +16,7 @@ import {
   Image,
   AlertTriangle,
   Trash2,
+  X,
 } from 'lucide-react';
 import { useSnackbar } from 'notistack';
 
@@ -69,6 +70,7 @@ const PremiumSubscriptionsPage = () => {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [expiringDaysThreshold, setExpiringDaysThreshold] = useState(15);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   // Cargar suscripciones
   const loadData = useCallback(async () => {
@@ -792,16 +794,14 @@ const PremiumSubscriptionsPage = () => {
                   <DetailSection title="Comprobante de Pago">
                     {selectedSubscription.paymentProof ? (
                       isPdf(selectedSubscription.paymentProof) ? (
-                        <a
-                          href={getUploadUrl(selectedSubscription.paymentProof)}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <div
+                          onClick={() => setPreviewDoc({ url: getUploadUrl(selectedSubscription.paymentProof), type: 'pdf' })}
                           className="flex flex-col items-center p-6 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
                         >
                           <FileText className="w-12 h-12 text-red-500 mb-2" />
                           <span className="text-primary font-medium">Ver PDF del comprobante</span>
                           <span className="text-xs text-gray-500">Clic para abrir</span>
-                        </a>
+                        </div>
                       ) : (
                         <ImagePreview
                           src={getUploadUrl(selectedSubscription.paymentProof)}
@@ -827,15 +827,13 @@ const PremiumSubscriptionsPage = () => {
                         {selectedSubscription.additionalDocs.map((doc) => (
                           <div key={doc.id} className="border border-gray-200 rounded-lg overflow-hidden">
                             {isPdf(doc.url_archivo) ? (
-                              <a
-                                href={getUploadUrl(doc.url_archivo)}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <div
+                                onClick={() => setPreviewDoc({ url: getUploadUrl(doc.url_archivo), type: 'pdf' })}
                                 className="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
                               >
                                 <FileText className="w-8 h-8 text-red-500 mb-1" />
                                 <span className="text-xs text-primary font-medium">Ver PDF</span>
-                              </a>
+                              </div>
                             ) : (
                               <ImagePreview
                                 src={getUploadUrl(doc.url_archivo)}
@@ -983,6 +981,48 @@ const PremiumSubscriptionsPage = () => {
           </Button>
         </Dialog.Footer>
       </Dialog>
+
+      {/* Modal de previsualización de documentos */}
+      {previewDoc && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4"
+          onClick={() => setPreviewDoc(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl h-[90vh] bg-white rounded-lg overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+              <span className="text-sm font-medium text-gray-700">
+                {previewDoc.type === 'pdf' ? 'Vista previa del PDF' : 'Vista previa de la imagen'}
+              </span>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="p-1.5 text-gray-500 hover:bg-red-500 hover:text-white rounded-full transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 min-h-0">
+              {previewDoc.type === 'pdf' ? (
+                <iframe
+                  src={previewDoc.url}
+                  className="w-full h-full border-0"
+                  title="Vista previa del documento"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100 p-4">
+                  <img
+                    src={previewDoc.url}
+                    alt="Vista previa"
+                    className="max-w-full max-h-full object-contain rounded"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bulk delete confirmation dialog */}
       <ConfirmDialog

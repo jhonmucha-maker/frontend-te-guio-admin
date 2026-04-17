@@ -38,6 +38,7 @@ import adminService from '../../../services/adminService';
 import api from '../../../services/api';
 import { ConfirmDialog } from '../../../components';
 import { Button, Card, Dialog, Spinner } from '../../../components/ui';
+import { getImageUrl } from '../../../utils/helpers';
 import PlanFormDialog from './PlanFormDialog';
 
 // -- Leaflet icon fix for Vite --
@@ -1898,7 +1899,7 @@ function GalleryFormDialog({ open, onClose, editItem, onSaved, selectOptions }) 
                 {galleryForm.images.map((img, index) => (
                   <div key={index} className="relative w-20 h-20">
                     <img
-                      src={img}
+                      src={img.startsWith('data:') ? img : getImageUrl(img)}
                       alt={`Foto ${index + 1}`}
                       className="w-full h-full object-cover rounded-lg border border-gray-200"
                     />
