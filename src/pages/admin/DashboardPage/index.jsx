@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Users,
   Building2,
-  ClipboardList,
   Package,
   CreditCard,
   DollarSign,
@@ -44,14 +43,12 @@ const DashboardPage = () => {
     loadDashboard();
 
     const handler = () => loadDashboard();
-    subscribeToEvent(SSE_EVENTS.ADMIN_PENDING_SELLER, handler);
     subscribeToEvent(SSE_EVENTS.ADMIN_PENDING_STORE, handler);
     subscribeToEvent(SSE_EVENTS.ADMIN_PENDING_PRODUCT, handler);
     subscribeToEvent(SSE_EVENTS.ADMIN_PENDING_SUBSCRIPTION, handler);
     subscribeToEvent(SSE_EVENTS.TICKET_CREATED, handler);
 
     return () => {
-      unsubscribeFromEvent(SSE_EVENTS.ADMIN_PENDING_SELLER, handler);
       unsubscribeFromEvent(SSE_EVENTS.ADMIN_PENDING_STORE, handler);
       unsubscribeFromEvent(SSE_EVENTS.ADMIN_PENDING_PRODUCT, handler);
       unsubscribeFromEvent(SSE_EVENTS.ADMIN_PENDING_SUBSCRIPTION, handler);
@@ -99,17 +96,6 @@ const DashboardPage = () => {
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       to: '/sellers',
-    },
-    {
-      label: 'Solicitudes de Registro',
-      value: data?.pendingSellers || 0,
-      subtitle: 'Nuevos vendedores',
-      icon: ClipboardList,
-      color: 'warning',
-      borderColor: 'border-t-amber-500',
-      iconBg: 'bg-amber-100',
-      iconColor: 'text-amber-600',
-      to: '/registration-requests',
     },
     {
       label: 'Solicitudes de Tiendas',
@@ -170,7 +156,6 @@ const DashboardPage = () => {
 
   // Pending actions - only show those with value > 0
   const pendingActions = [
-    { value: data?.pendingSellers || 0, label: 'Solicitud(es) de registro', to: '/registration-requests' },
     { value: data?.pendingStores || 0, label: 'Solicitud(es) de tiendas', to: '/store-requests' },
     { value: data?.pendingProducts || 0, label: 'Solicitud(es) de productos', to: '/product-requests' },
     { value: data?.pendingSubscriptions || 0, label: 'Suscripcion(es) pendiente(s)', to: '/subscriptions' },

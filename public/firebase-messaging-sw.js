@@ -45,7 +45,6 @@ self.addEventListener('notificationclick', (event) => {
     const type = data.event_type;
     if (type.startsWith('admin.pending.product')) url = '/product-requests';
     else if (type.startsWith('admin.pending.store')) url = '/store-requests';
-    else if (type.startsWith('admin.pending.seller')) url = '/registration-requests';
     else if (type.startsWith('admin.pending.subscription')) url = '/subscriptions';
     else if (type.startsWith('ticket.')) url = '/complaints';
     else if (type.startsWith('subscription.')) url = '/subscriptions';

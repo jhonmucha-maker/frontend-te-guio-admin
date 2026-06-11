@@ -122,7 +122,6 @@ export const AUTH_ERROR_CODES = {
 // Eventos SSE (deben coincidir EXACTO con backend/config/eventNames.js)
 export const SSE_EVENTS = {
   ACCOUNT_DISABLED: 'account.disabled',
-  ADMIN_PENDING_SELLER: 'admin.pending.seller',
   ADMIN_PENDING_STORE: 'admin.pending.store',
   ADMIN_PENDING_PRODUCT: 'admin.pending.product',
   ADMIN_PENDING_SUBSCRIPTION: 'admin.pending.subscription',

@@ -20,8 +20,6 @@ import {
 import { useSnackbar } from 'notistack';
 
 import adminService from '../../../services/adminService';
-import { subscribeToEvent, unsubscribeFromEvent } from '../../../services/socketService';
-import { SSE_EVENTS } from '../../../utils/constants';
 import { formatDateTime } from '../../../utils/helpers';
 import { Button, Switch, Spinner, Select } from '../../../components/ui';
 import {
@@ -89,13 +87,6 @@ const SellersPage = () => {
   useEffect(() => {
     loadSellers();
     loadFilterOptions();
-
-    const handler = () => loadSellers();
-    subscribeToEvent(SSE_EVENTS.ADMIN_PENDING_SELLER, handler);
-
-    return () => {
-      unsubscribeFromEvent(SSE_EVENTS.ADMIN_PENDING_SELLER, handler);
-    };
   }, [loadSellers, loadFilterOptions]);
 
   // Toggle active status

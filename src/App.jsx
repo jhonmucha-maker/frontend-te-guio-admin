@@ -11,7 +11,6 @@ import MainLayout from './components/layout/MainLayout';
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 const BuyersPage = lazy(() => import('./pages/admin/BuyersPage'));
 const SellersPage = lazy(() => import('./pages/admin/SellersPage'));
-const RegistrationRequestsPage = lazy(() => import('./pages/admin/RegistrationRequestsPage'));
 const ProductRequestsPage = lazy(() => import('./pages/admin/ProductRequestsPage'));
 const StoreRequestsPage = lazy(() => import('./pages/admin/StoreRequestsPage'));
 const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
@@ -93,7 +92,6 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="buyers" element={<BuyersPage />} />
           <Route path="sellers" element={<SellersPage />} />
-          <Route path="registration-requests" element={<RegistrationRequestsPage />} />
           <Route path="product-requests" element={<ProductRequestsPage />} />
           <Route path="store-requests" element={<StoreRequestsPage />} />
           <Route path="products" element={<AdminProductsPage />} />

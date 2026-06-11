@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Users,
   Store,
-  ClipboardList,
   Package,
   Building2,
   CreditCard,
@@ -39,7 +38,6 @@ const getMenuSections = (isPrimaryAdmin) => [
   {
     title: 'Solicitudes',
     items: [
-      { path: '/registration-requests', label: 'Registro de Vendedores', icon: ClipboardList, badgeKey: 'pendingSellers' },
       { path: '/product-requests', label: 'Productos', icon: FolderTree, badgeKey: 'pendingProducts' },
       { path: '/store-requests', label: 'Tiendas', icon: Building2, badgeKey: 'pendingStores' },
     ],

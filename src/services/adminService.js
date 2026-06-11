@@ -5,10 +5,6 @@ const adminService = {
   // Dashboard
   getDashboard: () => apiService.get('/admin/dashboard'),
 
-  // Aprobaciones - Vendedores
-  getPendingSellers: () => apiService.get('/admin/approvals/sellers'),
-  approveSeller: (id, data) => apiService.patch(`/admin/approvals/sellers/${id}`, data),
-
   // Aprobaciones - Tiendas
   getPendingStores: () => apiService.get('/admin/approvals/stores'),
   approveStore: (id, data) => apiService.patch(`/admin/approvals/stores/${id}`, data),
@@ -23,7 +19,6 @@ const adminService = {
   updateSubscriptionEndDate: (id, data) => apiService.patch(`/admin/subscriptions/${id}/end-date`, data),
 
   // Eliminacion masiva de rechazados
-  bulkDeleteRejectedSellers: (ids) => apiService.post('/admin/approvals/sellers/bulk-delete', { ids }),
   bulkDeleteRejectedStores: (ids) => apiService.post('/admin/approvals/stores/bulk-delete', { ids }),
   bulkDeleteRejectedProducts: (ids) => apiService.post('/admin/approvals/products/bulk-delete', { ids }),
   bulkDeleteRejectedSubscriptions: (ids) => apiService.post('/admin/approvals/subscriptions/bulk-delete', { ids }),
