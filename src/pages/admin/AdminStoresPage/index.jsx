@@ -30,7 +30,7 @@ import {
   ConfirmDialog,
 } from '../../../components';
 import DetailModal, { DetailRow, DetailSection } from '../../../components/modals/DetailModal';
-import { Button, Card, Spinner } from '../../../components/ui';
+import { Button, Card, Spinner, ExportButton } from '../../../components/ui';
 
 // Parse date safely to avoid timezone offset issues
 const parseDateSafe = (dateString) => {
@@ -240,14 +240,17 @@ const AdminStoresPage = () => {
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
           Gestion de Tiendas
         </h1>
-        <button
-          onClick={loadStores}
-          disabled={loading}
-          className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
-          title="Actualizar"
-        >
-          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton exportFn={adminService.exportStores} baseName="tiendas" />
+          <button
+            onClick={loadStores}
+            disabled={loading}
+            className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+            title="Actualizar"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

@@ -28,7 +28,7 @@ import {
   ConfirmDialog,
 } from '../../../components';
 import DetailModal, { DetailRow, DetailSection } from '../../../components/modals/DetailModal';
-import { Button, Switch, Spinner } from '../../../components/ui';
+import { Button, Switch, Spinner, ExportButton } from '../../../components/ui';
 
 const AdminProductsPage = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -209,14 +209,17 @@ const AdminProductsPage = () => {
         <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
           Gestion de Productos
         </h1>
-        <button
-          onClick={loadProducts}
-          disabled={loading}
-          className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-          title="Actualizar"
-        >
-          <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton exportFn={adminService.exportProducts} baseName="productos" />
+          <button
+            onClick={loadProducts}
+            disabled={loading}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            title="Actualizar"
+          >
+            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

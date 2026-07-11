@@ -36,8 +36,8 @@ import 'leaflet/dist/leaflet.css';
 
 import adminService from '../../../services/adminService';
 import api from '../../../services/api';
-import { ConfirmDialog } from '../../../components';
-import { Button, Card, Dialog, Spinner } from '../../../components/ui';
+import { ConfirmDialog, SearchInput } from '../../../components';
+import { Button, Card, Dialog, Spinner, ExportButton } from '../../../components/ui';
 import { getImageUrl } from '../../../utils/helpers';
 import PlanFormDialog from './PlanFormDialog';
 
@@ -102,6 +102,7 @@ const sections = [
     label: 'Categorias',
     displayLabel: 'Gestion de Categorias',
     icon: LayoutGrid,
+    searchable: true,
     fields: [
       { name: 'nombre', label: 'Nombre', required: true },
       { name: 'descripcion', label: 'Descripcion' },
@@ -113,6 +114,7 @@ const sections = [
     displayLabel: 'Gestion de Galerias',
     icon: Store,
     customForm: true,
+    searchable: true,
     fields: [
       { name: 'nombre', label: 'Nombre', required: true },
       { name: 'direccion', label: 'Direccion' },
@@ -213,6 +215,13 @@ const sections = [
   },
 ];
 
+// Secciones de configuracion que ofrecen exportacion Excel / PDF.
+const exportMap = {
+  galleries: { fn: (format) => adminService.exportGalleries(format), baseName: 'galerias' },
+  zones: { fn: (format) => adminService.exportZones(format), baseName: 'zonas' },
+  categories: { fn: (format) => adminService.exportCategories(format), baseName: 'categorias' },
+};
+
 // Service map -- adminService methods return data directly (apiService auto-extracts .data)
 const serviceMap = {
   cities: {
@@ -284,9 +293,21 @@ const ConfigPage = () => {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [selectOptions, setSelectOptions] = useState({});
+  const [search, setSearch] = useState('');
 
   const section = sections.find((s) => s.key === activeSection);
   const svc = activeSection ? serviceMap[activeSection] : null;
+
+  // Para secciones con buscador (galerias, categorias): filtra por nombre y
+  // ordena alfabeticamente. El resto de secciones se muestran sin alterar.
+  const displayItems = section?.searchable
+    ? [...items]
+        .filter((i) => {
+          const q = search.trim().toLowerCase();
+          return !q || (i.nombre || '').toLowerCase().includes(q);
+        })
+        .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' }))
+    : items;
 
   // Load items when section changes
   const loadItems = useCallback(async () => {
@@ -522,7 +543,7 @@ const ConfigPage = () => {
         return (
           <Card key={s.key} className="!p-0 overflow-hidden">
             <button
-              onClick={() => setActiveSection(isExpanded ? null : s.key)}
+              onClick={() => { setActiveSection(isExpanded ? null : s.key); setSearch(''); }}
               className={`w-full flex items-center gap-3 px-5 py-4 text-left transition-all duration-200 ${
                 isExpanded
                   ? 'bg-primary text-white'
@@ -550,15 +571,33 @@ const ConfigPage = () => {
                   <TermsPrivacyEditor />
                 ) : (
                   <>
-                    {!s.noCreate && (
+                    {(!s.noCreate || exportMap[s.key]) && (
+                      <div className="flex items-center gap-2 mb-4">
+                        {!s.noCreate && (
+                          <Button
+                            size="sm"
+                            startIcon={<Plus className="w-4 h-4" />}
+                            onClick={openCreate}
+                          >
+                            Agregar
+                          </Button>
+                        )}
+                        {exportMap[s.key] && (
+                          <ExportButton
+                            exportFn={exportMap[s.key].fn}
+                            baseName={exportMap[s.key].baseName}
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {s.searchable && (
                       <div className="mb-4">
-                        <Button
-                          size="sm"
-                          startIcon={<Plus className="w-4 h-4" />}
-                          onClick={openCreate}
-                        >
-                          Agregar
-                        </Button>
+                        <SearchInput
+                          value={search}
+                          onChange={setSearch}
+                          placeholder="Buscar por nombre..."
+                        />
                       </div>
                     )}
 
@@ -566,7 +605,7 @@ const ConfigPage = () => {
                       <div className="flex justify-center py-8">
                         <Spinner size="lg" />
                       </div>
-                    ) : items.length === 0 ? (
+                    ) : displayItems.length === 0 ? (
                       <p className="text-center text-gray-500 py-8 text-sm">Sin registros</p>
                     ) : (
                       <div className="overflow-x-auto">
@@ -585,7 +624,7 @@ const ConfigPage = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {items.map((item) => (
+                            {displayItems.map((item) => (
                               <tr
                                 key={item.id}
                                 className="border-b border-gray-100 hover:bg-gray-50"

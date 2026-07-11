@@ -14,7 +14,7 @@ import adminService from '../../../services/adminService';
 import { subscribeToEvent, unsubscribeFromEvent } from '../../../services/socketService';
 import { SSE_EVENTS } from '../../../utils/constants';
 import { formatDateTime } from '../../../utils/helpers';
-import { Button, Switch, Spinner } from '../../../components/ui';
+import { Button, Switch, Spinner, ExportButton } from '../../../components/ui';
 import {
   StatsHeader,
   DataTable,
@@ -244,14 +244,17 @@ const BuyersPage = () => {
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
           Gestion de Compradores
         </h1>
-        <button
-          onClick={loadBuyers}
-          disabled={loading}
-          className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
-          title="Actualizar"
-        >
-          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton exportFn={adminService.exportBuyers} baseName="compradores" />
+          <button
+            onClick={loadBuyers}
+            disabled={loading}
+            className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+            title="Actualizar"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

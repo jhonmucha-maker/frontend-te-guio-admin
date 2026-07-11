@@ -98,8 +98,14 @@ const adminService = {
   updateAdmin: (id, data) => apiService.put(`/admin/admins/${id}`, data),
   deleteAdmin: (id) => apiService.delete(`/admin/admins/${id}`),
 
-  // Export (necesita responseType blob - usa instancia raw)
+  // Export (necesita responseType blob - usa instancia raw). format: 'xlsx' | 'pdf'
   exportSellersExcel: () => api.get('/admin/export/sellers', { responseType: 'blob' }),
+  exportBuyers: (format) => api.get('/admin/export/buyers', { params: { format }, responseType: 'blob' }),
+  exportProducts: (format) => api.get('/admin/export/products', { params: { format }, responseType: 'blob' }),
+  exportStores: (format) => api.get('/admin/export/stores', { params: { format }, responseType: 'blob' }),
+  exportGalleries: (format) => api.get('/admin/export/galleries', { params: { format }, responseType: 'blob' }),
+  exportZones: (format) => api.get('/admin/export/zones', { params: { format }, responseType: 'blob' }),
+  exportCategories: (format) => api.get('/admin/export/categories', { params: { format }, responseType: 'blob' }),
 
   // Fotos de galeria
   addGalleryPhotos: (id, formData) => apiService.upload(`/admin/galleries/${id}/photos`, formData),
