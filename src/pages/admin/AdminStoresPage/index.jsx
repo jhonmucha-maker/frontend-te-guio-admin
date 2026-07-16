@@ -74,6 +74,7 @@ const AdminStoresPage = () => {
         id: s.id,
         name: s.nombre || '',
         description: s.descripcion || '',
+        observation: s.observacion || '',
         status: s.activo ? 'active' : 'inactive',
         isPremium: s.es_premium || false,
         premiumExpiry: s.fecha_fin_premium || null,
@@ -465,6 +466,11 @@ const AdminStoresPage = () => {
                 icon={<DoorOpen className="w-4 h-4" />}
                 label="Puesto"
                 value={selectedStore.stallNumber || 'No especificado'}
+              />
+              <DetailRow
+                label="Observacion"
+                value={selectedStore.observation || 'Sin observacion'}
+                fullWidth
               />
               <DetailRow
                 icon={<Package className="w-4 h-4" />}

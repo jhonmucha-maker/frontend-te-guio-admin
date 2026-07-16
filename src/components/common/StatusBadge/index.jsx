@@ -6,11 +6,13 @@ import {
   X,
   Star,
   AlertTriangle,
+  MailWarning,
+  Ban,
 } from 'lucide-react';
 
 /**
  * StatusBadge - Badge de estado reutilizable
- * @param {string} status - Estado (active, inactive, pending, approved, rejected, premium, expiring)
+ * @param {string} status - Estado (active, inactive, unverified, suspended, pending, approved, rejected, premium, expiring)
  * @param {string} label - Texto personalizado (opcional)
  * @param {string} size - Tamano (small, medium)
  */
@@ -27,6 +29,20 @@ const StatusBadge = ({ status, label, size = 'small' }) => {
       bgColor: 'bg-gray-100',
       textColor: 'text-gray-600',
       icon: XCircle,
+    },
+    // Cuenta de usuario que aun no ingresa su codigo de activacion.
+    unverified: {
+      label: 'Inactivo',
+      bgColor: 'bg-amber-100',
+      textColor: 'text-amber-700',
+      icon: MailWarning,
+    },
+    // Cuenta inhabilitada por un administrador.
+    suspended: {
+      label: 'Suspendido',
+      bgColor: 'bg-gray-100',
+      textColor: 'text-gray-600',
+      icon: Ban,
     },
     pending: {
       label: 'Pendiente',

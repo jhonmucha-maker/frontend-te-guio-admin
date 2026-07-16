@@ -99,13 +99,24 @@ const adminService = {
   deleteAdmin: (id) => apiService.delete(`/admin/admins/${id}`),
 
   // Export (necesita responseType blob - usa instancia raw). format: 'xlsx' | 'pdf'
-  exportSellersExcel: () => api.get('/admin/export/sellers', { responseType: 'blob' }),
-  exportBuyers: (format) => api.get('/admin/export/buyers', { params: { format }, responseType: 'blob' }),
-  exportProducts: (format) => api.get('/admin/export/products', { params: { format }, responseType: 'blob' }),
-  exportStores: (format) => api.get('/admin/export/stores', { params: { format }, responseType: 'blob' }),
-  exportGalleries: (format) => api.get('/admin/export/galleries', { params: { format }, responseType: 'blob' }),
-  exportZones: (format) => api.get('/admin/export/zones', { params: { format }, responseType: 'blob' }),
-  exportCategories: (format) => api.get('/admin/export/categories', { params: { format }, responseType: 'blob' }),
+  // La entidad es la clave del registro del backend (utils/datasets).
+  exportEntity: (entity, format) =>
+    api.get(`/admin/export/${entity}`, { params: { format }, responseType: 'blob' }),
+  exportSellers: (format) => adminService.exportEntity('sellers', format),
+  exportBuyers: (format) => adminService.exportEntity('buyers', format),
+  exportProducts: (format) => adminService.exportEntity('products', format),
+  exportStores: (format) => adminService.exportEntity('stores', format),
+  exportGalleries: (format) => adminService.exportEntity('galleries', format),
+  exportZones: (format) => adminService.exportEntity('zones', format),
+  exportCategories: (format) => adminService.exportEntity('categories', format),
+
+  // Exportacion general: un solo archivo con varias entidades.
+  getExportCatalog: () => apiService.get('/admin/export/catalog'),
+  exportBundle: (entities, format) =>
+    api.get('/admin/export/bundle', {
+      params: { entities: entities.join(','), format },
+      responseType: 'blob',
+    }),
 
   // Fotos de galeria
   addGalleryPhotos: (id, formData) => apiService.upload(`/admin/galleries/${id}/photos`, formData),

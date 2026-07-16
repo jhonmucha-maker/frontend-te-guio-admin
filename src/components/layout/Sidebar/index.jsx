@@ -14,6 +14,7 @@ import {
   FolderTree,
   ShieldCheck,
   Bell,
+  Download,
   X,
 } from 'lucide-react';
 import { SIDEBAR_WIDTH, APP_NAME, APP_VERSION, SSE_EVENTS } from '../../../utils/constants';
@@ -56,6 +57,7 @@ const getMenuSections = (isPrimaryAdmin) => [
       { path: '/payment-methods', label: 'Metodos de Pago', icon: DollarSign },
       { path: '/finances', label: 'Finanzas', icon: BarChart3 },
       { path: '/reports', label: 'Reportes', icon: BarChart3 },
+      { path: '/exports', label: 'Exportaciones', icon: Download },
     ],
   },
   {

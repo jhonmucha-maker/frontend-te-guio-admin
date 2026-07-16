@@ -19,6 +19,7 @@ const PremiumSubscriptionsPage = lazy(() => import('./pages/admin/PremiumSubscri
 const PaymentMethodsPage = lazy(() => import('./pages/admin/PaymentMethodsPage'));
 const FinancesPage = lazy(() => import('./pages/admin/FinancesPage'));
 const ReportsPage = lazy(() => import('./pages/admin/ReportsPage'));
+const ExportsPage = lazy(() => import('./pages/admin/ExportsPage'));
 const ComplaintsPage = lazy(() => import('./pages/admin/ComplaintsPage'));
 const ConfigPage = lazy(() => import('./pages/admin/ConfigPage'));
 const PushNotificationsPage = lazy(() => import('./pages/admin/PushNotificationsPage'));
@@ -100,6 +101,7 @@ function App() {
           <Route path="payment-methods" element={<PaymentMethodsPage />} />
           <Route path="finances" element={<FinancesPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="exports" element={<ExportsPage />} />
           <Route path="complaints" element={<ComplaintsPage />} />
           <Route path="admins" element={<AdminsManagementPage />} />
           <Route path="push-notifications" element={<PushNotificationsPage />} />

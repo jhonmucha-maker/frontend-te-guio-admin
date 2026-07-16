@@ -12,7 +12,7 @@ import { useSnackbar } from 'notistack';
 
 import adminService from '../../../services/adminService';
 import { subscribeToEvent, unsubscribeFromEvent } from '../../../services/socketService';
-import { SSE_EVENTS } from '../../../utils/constants';
+import { SSE_EVENTS, ACCOUNT_STATUS_BADGE, ACCOUNT_STATUS_FILTERS } from '../../../utils/constants';
 import { formatDateTime } from '../../../utils/helpers';
 import { Button, Switch, Spinner, ExportButton } from '../../../components/ui';
 import {
@@ -30,6 +30,7 @@ const BuyersPage = () => {
 
   // Data state
   const [buyers, setBuyers] = useState([]);
+  const [counts, setCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
@@ -42,8 +43,9 @@ const BuyersPage = () => {
     setLoading(true);
     try {
       const data = await adminService.getBuyers();
-      // Backend returns { compradores, total, activos, inactivos }
+      // Backend returns { compradores, total, activos, sin_verificar, suspendidos }
       setBuyers(data?.compradores || []);
+      setCounts(data || {});
     } catch {
       enqueueSnackbar('Error al cargar compradores', { variant: 'error' });
     } finally {
@@ -53,27 +55,23 @@ const BuyersPage = () => {
 
   useEffect(() => {
     loadBuyers();
-
-    loadBuyers();
   }, [loadBuyers]);
 
   // Toggle active status
   const handleToggleActive = async (buyer) => {
     setActionLoading(true);
     try {
-      await adminService.toggleUserActive(buyer.id);
+      // El backend devuelve el estado ya derivado: no se recalcula aqui.
+      const { activo, estado_cuenta } = await adminService.toggleUserActive(buyer.id);
       enqueueSnackbar(
         buyer.activo ? 'Comprador desactivado' : 'Comprador activado',
         { variant: 'success' }
       );
-      // Update local state
-      setBuyers((prev) =>
-        prev.map((b) => (b.id === buyer.id ? { ...b, activo: !b.activo } : b))
-      );
-      // Update modal if open
       if (selectedBuyer?.id === buyer.id) {
-        setSelectedBuyer((prev) => ({ ...prev, activo: !prev.activo }));
+        setSelectedBuyer((prev) => ({ ...prev, activo, estado_cuenta }));
       }
+      // Recarga para mantener lista y contadores consistentes.
+      await loadBuyers();
     } catch (err) {
       enqueueSnackbar(err.response?.data?.error || 'Error al cambiar estado', { variant: 'error' });
     } finally {
@@ -99,22 +97,25 @@ const BuyersPage = () => {
     }
   };
 
-  // Computed stats
-  const activeCount = useMemo(() => buyers.filter((b) => b.activo).length, [buyers]);
-  const inactiveCount = useMemo(() => buyers.filter((b) => !b.activo).length, [buyers]);
-
-  // Filter chips
+  // Filter chips (contadores calculados por el backend)
   const filterOptions = [
     { key: 'all', label: 'Todos', count: buyers.length },
-    { key: 'active', label: 'Activos', count: activeCount },
-    { key: 'inactive', label: 'Inactivos', count: inactiveCount },
+    ...ACCOUNT_STATUS_FILTERS.map(({ key, label, countKey }) => ({
+      key,
+      label,
+      count: counts[countKey] ?? 0,
+    })),
   ];
 
   // Stats header
   const stats = [
     { key: 'total', label: 'Total', value: buyers.length, color: 'primary' },
-    { key: 'active', label: 'Activos', value: activeCount, color: 'success' },
-    { key: 'inactive', label: 'Inactivos', value: inactiveCount, color: 'error' },
+    ...ACCOUNT_STATUS_FILTERS.map(({ key, label, countKey, color }) => ({
+      key,
+      label,
+      value: counts[countKey] ?? 0,
+      color,
+    })),
   ];
 
   // Filtered buyers
@@ -130,8 +131,8 @@ const BuyersPage = () => {
         if (!matchSearch) return false;
       }
       // Status filter
-      if (filter === 'active' && !u.activo) return false;
-      if (filter === 'inactive' && u.activo) return false;
+      const selected = ACCOUNT_STATUS_FILTERS.find((f) => f.key === filter);
+      if (selected && u.estado_cuenta !== selected.status) return false;
       return true;
     });
   }, [buyers, searchQuery, filter]);
@@ -167,12 +168,12 @@ const BuyersPage = () => {
       render: (value) => value?.nombre || '-',
     },
     {
-      id: 'activo',
+      id: 'estado_cuenta',
       label: 'Estado',
       minWidth: 100,
       align: 'center',
       render: (value) => (
-        <StatusBadge status={value ? 'active' : 'inactive'} />
+        <StatusBadge status={ACCOUNT_STATUS_BADGE[value]} />
       ),
     },
     {
@@ -212,7 +213,7 @@ const BuyersPage = () => {
           <p className="font-semibold text-gray-900">{buyer.nombre}</p>
           <p className="text-sm text-gray-500">{buyer.correo}</p>
         </div>
-        <StatusBadge status={buyer.activo ? 'active' : 'inactive'} />
+        <StatusBadge status={ACCOUNT_STATUS_BADGE[buyer.estado_cuenta]} />
       </div>
       <div className="flex gap-4 mt-2 text-sm text-gray-500">
         {buyer.telefono && <span>{buyer.telefono}</span>}
@@ -358,7 +359,7 @@ const BuyersPage = () => {
                 <span className="text-sm text-gray-500 font-medium min-w-[140px]">
                   Estado:
                 </span>
-                <StatusBadge status={selectedBuyer.activo ? 'active' : 'inactive'} />
+                <StatusBadge status={ACCOUNT_STATUS_BADGE[selectedBuyer.estado_cuenta]} />
               </div>
             </DetailSection>
           </>

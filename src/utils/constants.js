@@ -32,11 +32,30 @@ export const SUBSCRIPTION_STATUS = {
   EXPIRED: 'EXPIRED',
 };
 
-// Estados de usuario
-export const USER_STATUS = {
-  ACTIVE: true,
-  INACTIVE: false,
+// Estado de cuenta derivado por el backend (deben coincidir con
+// backend/config/constants.js ACCOUNT_STATUS). Llega ya calculado en
+// `estado_cuenta`: no se recalcula aqui a partir de activo/correo_verificado.
+export const ACCOUNT_STATUS = {
+  ACTIVO: 'ACTIVO',
+  INACTIVO: 'INACTIVO',
+  SUSPENDIDO: 'SUSPENDIDO',
 };
+
+// Variante de StatusBadge para cada estado de cuenta.
+export const ACCOUNT_STATUS_BADGE = {
+  [ACCOUNT_STATUS.ACTIVO]: 'active',
+  [ACCOUNT_STATUS.INACTIVO]: 'unverified',
+  [ACCOUNT_STATUS.SUSPENDIDO]: 'suspended',
+};
+
+// Chips de filtro por estado. `countKey` referencia los contadores que devuelven
+// getBuyers/getSellers (backend/config/constants.js ACCOUNT_STATUS_COUNT_KEYS).
+// `color` alimenta las StatsCard del encabezado.
+export const ACCOUNT_STATUS_FILTERS = [
+  { key: 'active', label: 'Activos', status: ACCOUNT_STATUS.ACTIVO, countKey: 'activos', color: 'success' },
+  { key: 'unverified', label: 'Sin verificar', status: ACCOUNT_STATUS.INACTIVO, countKey: 'sin_verificar', color: 'warning' },
+  { key: 'suspended', label: 'Suspendidos', status: ACCOUNT_STATUS.SUSPENDIDO, countKey: 'suspendidos', color: 'error' },
+];
 
 // Estados de ticket (el backend usa tickets, no complaints)
 export const TICKET_STATUS = {

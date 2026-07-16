@@ -9,7 +9,6 @@ import {
   Calendar,
   Star,
   Building2,
-  Download,
   Filter,
   X,
   ChevronDown,
@@ -21,7 +20,8 @@ import { useSnackbar } from 'notistack';
 
 import adminService from '../../../services/adminService';
 import { formatDateTime } from '../../../utils/helpers';
-import { Button, Switch, Spinner, Select } from '../../../components/ui';
+import { ACCOUNT_STATUS_BADGE, ACCOUNT_STATUS_FILTERS } from '../../../utils/constants';
+import { Button, Switch, Spinner, Select, ExportButton } from '../../../components/ui';
 import {
   StatsHeader,
   DataTable,
@@ -32,18 +32,40 @@ import {
 } from '../../../components';
 import DetailModal, { DetailRow, DetailSection } from '../../../components/modals/DetailModal';
 
+// Identificadores numericos: se comparan solo por digitos para tolerar
+// espacios, guiones o prefijos ("+51 999 888 777" encuentra "999888").
+const onlyDigits = (v) => String(v ?? '').replace(/\D/g, '');
+
+// Busca en nombre, correo, negocio, tiendas/galerias y en los identificadores
+// (telefono, DNI, RUC) que el backend ya envia en datos_facturacion.
+const matchesSearch = (u, rawQuery) => {
+  const query = (rawQuery || '').trim().toLowerCase();
+  if (!query) return true;
+
+  const fact = u.datos_facturacion || {};
+  const textFields = [
+    u.nombre, u.correo, fact.nombre_negocio, fact.razon_social,
+    ...(u.tiendas || []).flatMap((t) => [t.nombre, t.galeria]),
+  ];
+  if (textFields.some((f) => (f || '').toLowerCase().includes(query))) return true;
+
+  const queryDigits = onlyDigits(query);
+  if (!queryDigits) return false;
+  return [u.telefono, fact.dni, fact.ruc].some((f) => onlyDigits(f).includes(queryDigits));
+};
+
 const SellersPage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   // Data state
   const [sellers, setSellers] = useState([]);
+  const [counts, setCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, seller: null });
   const [actionLoading, setActionLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
 
   // Advanced filters
   const [showFilters, setShowFilters] = useState(false);
@@ -59,8 +81,9 @@ const SellersPage = () => {
     setLoading(true);
     try {
       const data = await adminService.getSellers();
-      // Backend returns { vendedores, total, activos, inactivos, premium }
+      // Backend returns { vendedores, total, activos, sin_verificar, suspendidos, premium }
       setSellers(data?.vendedores || []);
+      setCounts(data || {});
     } catch {
       enqueueSnackbar('Error al cargar vendedores', { variant: 'error' });
     } finally {
@@ -93,17 +116,17 @@ const SellersPage = () => {
   const handleToggleActive = async (seller) => {
     setActionLoading(true);
     try {
-      await adminService.toggleUserActive(seller.id);
+      // El backend devuelve el estado ya derivado: no se recalcula aqui.
+      const { activo, estado_cuenta } = await adminService.toggleUserActive(seller.id);
       enqueueSnackbar(
         seller.activo ? 'Vendedor desactivado' : 'Vendedor activado',
         { variant: 'success' }
       );
-      setSellers((prev) =>
-        prev.map((s) => (s.id === seller.id ? { ...s, activo: !s.activo } : s))
-      );
       if (selectedSeller?.id === seller.id) {
-        setSelectedSeller((prev) => ({ ...prev, activo: !prev.activo }));
+        setSelectedSeller((prev) => ({ ...prev, activo, estado_cuenta }));
       }
+      // Recarga para reflejar la cascada sobre las tiendas y los contadores.
+      await loadSellers();
     } catch (err) {
       enqueueSnackbar(err.response?.data?.error || 'Error al cambiar estado', { variant: 'error' });
     } finally {
@@ -129,45 +152,30 @@ const SellersPage = () => {
     }
   };
 
-  // Export to Excel
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const response = await adminService.exportSellersExcel();
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'vendedores.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      enqueueSnackbar('Excel descargado', { variant: 'success' });
-    } catch {
-      enqueueSnackbar('Error al exportar', { variant: 'error' });
-    } finally {
-      setExporting(false);
-    }
-  };
-
   // Computed stats — count stores, not sellers
   const allStores = useMemo(() => sellers.flatMap((s) => s.tiendas || []), [sellers]);
   const premiumStoreCount = useMemo(() => allStores.filter((t) => t.tipo_plan === 'PREMIUM').length, [allStores]);
   const standardStoreCount = useMemo(() => allStores.filter((t) => t.tipo_plan === 'ESTANDAR').length, [allStores]);
-  const activeCount = useMemo(() => sellers.filter((s) => s.activo).length, [sellers]);
-  const inactiveCount = useMemo(() => sellers.filter((s) => !s.activo).length, [sellers]);
-
-  // Stats header
+  // Stats header (contadores de estado calculados por el backend)
   const stats = [
     { key: 'total', label: 'Total', value: sellers.length, color: 'primary' },
-    { key: 'active', label: 'Activos', value: activeCount, color: 'success' },
-    { key: 'inactive', label: 'Inactivos', value: inactiveCount, color: 'error' },
+    ...ACCOUNT_STATUS_FILTERS.map(({ key, label, countKey, color }) => ({
+      key,
+      label,
+      value: counts[countKey] ?? 0,
+      color,
+    })),
     { key: 'premium', label: 'Premium', value: premiumStoreCount, color: 'premium', icon: <Star size={18} /> },
   ];
 
-  // Filter chips — counters reflect store subscriptions
+  // Filter chips — los de estado cuentan vendedores; los de plan, tiendas
   const filterOptions = [
     { key: 'all', label: 'Todos', count: sellers.length },
+    ...ACCOUNT_STATUS_FILTERS.map(({ key, label, countKey }) => ({
+      key,
+      label,
+      count: counts[countKey] ?? 0,
+    })),
     { key: 'premium', label: 'Premium', count: premiumStoreCount },
     { key: 'standard', label: 'Estandar', count: standardStoreCount },
   ];
@@ -185,14 +193,11 @@ const SellersPage = () => {
   const filteredSellers = useMemo(() => {
     return sellers.filter((u) => {
       // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchSearch =
-          (u.nombre || '').toLowerCase().includes(query) ||
-          (u.correo || '').toLowerCase().includes(query) ||
-          (u.tiendas || []).some((t) => (t.nombre || '').toLowerCase().includes(query));
-        if (!matchSearch) return false;
-      }
+      if (!matchesSearch(u, searchQuery)) return false;
+
+      // Status filter — estado de cuenta derivado por el backend
+      const statusFilter = ACCOUNT_STATUS_FILTERS.find((f) => f.key === filter);
+      if (statusFilter && u.estado_cuenta !== statusFilter.status) return false;
 
       // Type filter — based on store-level tipo_plan
       const tiendas = u.tiendas || [];
@@ -256,12 +261,12 @@ const SellersPage = () => {
       },
     },
     {
-      id: 'activo',
+      id: 'estado_cuenta',
       label: 'Estado',
       minWidth: 100,
       align: 'center',
       render: (value) => (
-        <StatusBadge status={value ? 'active' : 'inactive'} />
+        <StatusBadge status={ACCOUNT_STATUS_BADGE[value]} />
       ),
     },
   ];
@@ -291,7 +296,7 @@ const SellersPage = () => {
     <div>
       <div className="flex justify-between items-start mb-2">
         <p className="font-semibold text-gray-900">{seller.nombre}</p>
-        <StatusBadge status={seller.activo ? 'active' : 'inactive'} />
+        <StatusBadge status={ACCOUNT_STATUS_BADGE[seller.estado_cuenta]} />
       </div>
       <p className="text-sm text-gray-500 mb-1">{seller.correo}</p>
       {seller.tiendas && seller.tiendas.length > 0 && (
@@ -335,15 +340,7 @@ const SellersPage = () => {
           Gestion de Vendedores
         </h1>
         <div className="flex items-center gap-2">
-          <Button
-            variant="primary"
-            size="sm"
-            startIcon={<Download size={16} />}
-            onClick={handleExport}
-            disabled={exporting}
-          >
-            {exporting ? 'Exportando...' : 'Exportar'}
-          </Button>
+          <ExportButton exportFn={adminService.exportSellers} baseName="vendedores" />
           <button
             onClick={loadSellers}
             disabled={loading}
@@ -365,7 +362,7 @@ const SellersPage = () => {
             <SearchInput
               value={searchQuery}
               onChange={setSearchQuery}
-              placeholder="Buscar por nombre, email o tienda..."
+              placeholder="Buscar por nombre, email, teléfono, DNI, RUC, tienda o galería..."
             />
           </div>
           <Button
@@ -493,7 +490,7 @@ const SellersPage = () => {
           <>
             {/* Status badge */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <StatusBadge status={selectedSeller.activo ? 'active' : 'inactive'} size="medium" />
+              <StatusBadge status={ACCOUNT_STATUS_BADGE[selectedSeller.estado_cuenta]} size="medium" />
             </div>
 
             <DetailSection title="Informacion del Vendedor">
